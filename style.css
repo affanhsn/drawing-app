@@ -1,4 +1,68 @@
-/* Style included in index.html for simplicity but kept this file for structure */
 body {
-    background-color: #222;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #1a1a1a;
+    color: white;
+    display: flex;
+    justify-content: center;
+}
+
+.app-container {
+    width: 100%;
+    max-width: 800px;
+    text-align: center;
+    padding: 20px;
+}
+
+.character-select {
+    margin-bottom: 20px;
+}
+
+.char-btn {
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    background: #e23636;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.toolbar {
+    background: #333;
+    padding: 15px;
+    border-radius: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    border: 2px solid white;
+}
+
+.canvas-holder {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+canvas {
+    cursor: crosshair;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#eraser.active {
+    background: yellow;
+    color: black;
 }
