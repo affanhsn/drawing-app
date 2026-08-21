@@ -1,51 +1,55 @@
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
-const spidermanBtn = document.getElementById('spiderman');
-const ironmanBtn = document.getElementById('ironman');
+const eraserBtn = document.getElementById('eraser');
 const clearBtn = document.getElementById('clear');
 const colorPicker = document.getElementById('colorPicker');
 const sizePicker = document.getElementById('sizePicker');
+const swatches = document.querySelectorAll('.color-swatch');
 
-// Set canvas size
-function resizeCanvas() {
-    canvas.width = window.innerWidth * 0.95;
-    canvas.height = window.innerHeight * 0.75;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
+// Marvel Outlines
+const outlines = {
+    spiderman: 'https://i.imgur.com/8K5bC4Y.png',
+    ironman: 'https://i.imgur.com/M6LgA4f.png'
+};
 
 let drawing = false;
+let isEraser = false;
 
-function startDrawing(e) {
+function init() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = 500;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+}
+
+window.addEventListener('resize', init);
+init();
+
+function startPosition(e) {
     drawing = true;
     draw(e);
 }
 
-function stopDrawing() {
+function finishedPosition() {
     drawing = false;
     ctx.beginPath();
 }
 
 function draw(e) {
     if (!drawing) return;
-    
-    ctx.lineWidth = sizePicker.value;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = colorPicker.value;
 
     const rect = canvas.getBoundingClientRect();
-    let clientX, clientY;
+    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+    const y = (e.clientY || e.touches[0].clientY) - rect.top;
 
-    if (e.touches) {
-        clientX = e.touches[0].clientX;
-        clientY = e.touches[0].clientY;
+    ctx.lineWidth = sizePicker.value;
+    
+    if (isEraser) {
+        ctx.globalCompositeOperation = 'destination-out';
     } else {
-        clientX = e.clientX;
-        clientY = e.clientY;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = colorPicker.value;
     }
-
-    const x = clientX - rect.left;
-    const y = clientY - rect.top;
 
     ctx.lineTo(x, y);
     ctx.stroke();
@@ -53,33 +57,34 @@ function draw(e) {
     ctx.moveTo(x, y);
 }
 
-// Mouse Events
-canvas.addEventListener('mousedown', startDrawing);
+canvas.addEventListener('mousedown', startPosition);
+canvas.addEventListener('mouseup', finishedPosition);
 canvas.addEventListener('mousemove', draw);
-canvas.addEventListener('mouseup', stopDrawing);
-canvas.addEventListener('mouseout', stopDrawing);
+canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startPosition(e); });
+canvas.addEventListener('touchend', finishedPosition);
+canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); });
 
-// Touch Events
-canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startDrawing(e);
-}, { passive: false });
-canvas.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-    draw(e);
-}, { passive: false });
-canvas.addEventListener('touchend', stopDrawing);
-
-// Character Backgrounds
-spidermanBtn.onclick = () => {
-    canvas.style.backgroundImage = "url('https://i.imgur.com/8K5bC4Y.png')";
+eraserBtn.onclick = () => {
+    isEraser = !isEraser;
+    eraserBtn.classList.toggle('active');
 };
 
-ironmanBtn.onclick = () => {
-    canvas.style.backgroundImage = "url('https://i.imgur.com/M6LgA4f.png')";
-};
-
-// Clear Canvas
 clearBtn.onclick = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 };
+
+swatches.forEach(swatch => {
+    swatch.onclick = () => {
+        isEraser = false;
+        eraserBtn.classList.remove('active');
+        colorPicker.value = swatch.dataset.color;
+    };
+});
+
+document.getElementById('spiderman').onclick = () => setBackground('spiderman');
+document.getElementById('ironman').onclick = () => setBackground('ironman');
+
+function setBackground(char) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.style.backgroundImage = `url('${outlines[char]}')`;
+}
